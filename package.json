@@ -1,0 +1,33 @@
+{
+  "name": "lastexile-bot",
+  "version": "0.1.0",
+  "description": "A line bot for PCRD gulid \"lastExile\" to recording GVG score",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HARCHHI/lastExile-bot.git"
+  },
+  "keywords": [
+    "lineBot",
+    "heroku"
+  ],
+  "author": "HARCHHI",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HARCHHI/lastExile-bot/issues"
+  },
+  "homepage": "https://github.com/HARCHHI/lastExile-bot#readme",
+  "dependencies": {
+    "google-auth-library": "^3.1.2",
+    "googleapis": "^39.2.0",
+    "linebot": "^1.4.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.2"
+  }
+}
