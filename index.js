@@ -16,3 +16,4 @@
 // });
 
 // bot.listen('/linewebhook', 3000);
+console.log(process.env.test1);
