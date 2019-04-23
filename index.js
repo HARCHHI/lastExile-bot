@@ -1,19 +1,18 @@
-// const linebot = require('linebot');
+const linebot = require('linebot');
 
-// const bot = linebot({
-//   channelId: id,
-//   channelSecret: secret,
-//   channelAccessToken: token
-// });
+const bot = linebot({
+  channelId: process.env.LINE_BOT_ID,
+  channelSecret: process.env.LINE_BOT_SECRET,
+  channelAccessToken: process.env.LINE_BOT_TOKEN
+});
 
-// bot.on('message', (event) => {
-//   event.reply(event.message.text).then((data) => {
-//     // success
-//     console.log(data);
-//   }).catch((error) => {
-//     console.error(error);
-//   });
-// });
+bot.on('message', (event) => {
+  event.reply(event.message.text).then((data) => {
+    // success
+    console.log(data);
+  }).catch((error) => {
+    console.error(error);
+  });
+});
 
-// bot.listen('/linewebhook', 3000);
-console.log(process.env.test1);
+bot.listen('/linewebhook', 3000);
