@@ -1,4 +1,12 @@
+const dotenv = require('dotenv');
+
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
+
 const linebot = require('linebot');
+const CmdManager = require('./src/cmdManager');
+
 
 const bot = linebot({
   channelId: process.env.LINE_BOT_ID,
@@ -6,13 +14,17 @@ const bot = linebot({
   channelAccessToken: process.env.LINE_BOT_TOKEN
 });
 
-bot.on('message', (event) => {
-  event.reply(event.message.text).then((data) => {
-    // success
-    console.log(data);
-  }).catch((error) => {
-    console.error(error);
-  });
+const cmdManager = new CmdManager({
+  groupId: process.env.LAST_EXILE_GROUP_ID,
+  adminId: process.env.ADMIN_ID
 });
 
-bot.listen('/linewebhook', process.env.PORT);
+bot.on('message', (event) => {
+  const { type, text } = event.message;
+
+  if (type === 'text') cmdManager.execute(event, text);
+});
+
+bot.listen('/linewebhook', process.env.PORT, () => {
+  console.log('working');
+});
