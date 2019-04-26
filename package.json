@@ -1,6 +1,6 @@
 {
   "name": "lastexile-bot",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A line bot for PCRD gulid \"lastExile\" to recording GVG score",
   "main": "index.js",
   "scripts": {

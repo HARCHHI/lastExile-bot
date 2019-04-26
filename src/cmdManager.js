@@ -18,15 +18,15 @@ class CmdManager {
 
   _messageParser(msg) {
     try {
-      const matchResult = msg.match(/^!([a-z,A-Z]{1,}) {0,}(.*)/);
+      const matchResult = msg.match(/^!(.*)/);
       let cmd = null;
       let param;
 
-      if (matchResult !== null) [, cmd, param] = matchResult;
+      if (matchResult !== null) [cmd, ...param] = matchResult[1].split(' ');
 
       return {
         cmd,
-        param: param.split(' ')
+        param
       };
     } catch (error) {
       throw error;
@@ -71,20 +71,24 @@ class CmdManager {
   }
 
   async execute(event, msg) {
-    const { userId, type: sourceType, groupId } = event.source;
-    const { cmd = null, param } = this._messageParser(msg);
-    const method = cmds[cmdMap[cmd]];
+    try {
+      const { userId, type: sourceType, groupId } = event.source;
+      const { cmd = null, param } = this._messageParser(msg);
+      const method = cmds[cmdMap[cmd]];
 
-    await this._adminCmd(cmd, param, event);
+      await this._adminCmd(cmd, param, event);
 
-    if (method === undefined) return;
-    if (this.adminId === userId || this.adminMode === true) {
-      if (this.adminId === userId) method(event, ...param);
-      return;
-    }
+      if (method === undefined) return;
+      if (this.adminId === userId || this.adminMode === true) {
+        if (this.adminId === userId) method(event, ...param);
+        return;
+      }
 
-    if (this.groupMode === true && this._isGroupMessage(sourceType, groupId)) {
-      method(event, ...param);
+      if (this.groupMode === true && this._isGroupMessage(sourceType, groupId)) {
+        method(event, ...param);
+      }
+    } catch (error) {
+      throw error;
     }
   }
 }

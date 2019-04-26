@@ -22,7 +22,11 @@ const cmdManager = new CmdManager({
 bot.on('message', (event) => {
   const { type, text } = event.message;
 
-  if (type === 'text') cmdManager.execute(event, text);
+  if (type === 'text') {
+    cmdManager.execute(event, text).catch((err) => {
+      console.error(err);
+    });
+  }
 });
 
 bot.listen('/linewebhook', process.env.PORT, () => {

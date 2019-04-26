@@ -32,7 +32,7 @@ function updateRow(range, rowData) {
   const reqBody = {
     auth: oauth2Client,
     spreadsheetId: process.env.TARGET_SHEET_ID,
-    range: encodeURI(range),
+    range,
     valueInputOption: 'RAW',
     resource: {
       values: rowData
@@ -43,9 +43,58 @@ function updateRow(range, rowData) {
 
 function parseIdList(list) {
   return list.reduce((result, row, idx) => {
-    const [lineId = ''] = row;
+    const [lineId = '',, gameId = ''] = row;
 
-    if (!result.has(lineId)) result.set(lineId, idx + 1);
+    if (!result.has(lineId)) result.set(lineId, [idx + 1, gameId]);
+
+    return result;
+  }, new Map());
+}
+
+function getToday() {
+  const now = new Date();
+  const hours = now.getUTCHours();
+  const year = now.getUTCFullYear();
+  let month = now.getUTCMonth() + 1;
+  let date = now.getUTCDate();
+
+  if (hours + 3 >= 24) date += 1;
+  if (month < 10) month = `0${month}`;
+  if (date < 10) date = `0${date}`;
+
+  return `${year}/${month}/${date}`;
+}
+
+async function getIdList() {
+  const sheets = google.sheets('v4');
+
+  const res = await sheets.spreadsheets.values.get({
+    auth: oauth2Client,
+    spreadsheetId: process.env.TARGET_SHEET_ID,
+    range: encodeURI('idList!A1:C99')
+  });
+
+  return parseIdList(res.data.values);
+}
+
+async function getDamageList() {
+  const sheets = google.sheets('v4');
+
+  const res = await sheets.spreadsheets.values.get({
+    auth: oauth2Client,
+    spreadsheetId: process.env.TARGET_SHEET_ID,
+    range: '傷害表(系統)!A2:J32'
+  });
+
+  return res.data.values.reduce((result, row, index) => {
+    let [gameId] = row;
+
+    if (index === 0) {
+      result.set('days', row);
+      return result;
+    }
+    gameId = gameId.replace(/\[.*\] {0,1}/g, '');
+    result.set(gameId, index + 2);
 
     return result;
   }, new Map());
@@ -53,23 +102,58 @@ function parseIdList(list) {
 
 async function addUserIdToSheet(event, gameId) {
   try {
+    const idList = await getIdList();
     const profile = await event.source.profile();
     const { displayName, userId } = profile;
-    const sheets = google.sheets('v4');
-    const res = await sheets.spreadsheets.values.get({
-      auth: oauth2Client,
-      spreadsheetId: process.env.TARGET_SHEET_ID,
-      range: encodeURI('idList!A1:C99')
-    });
     const rowData = [[userId, displayName, gameId]];
-    const idList = parseIdList(res.data.values);
+
     if (idList.has(userId) === true) {
-      const idIndex = idList.get(userId);
+      const [idIndex, originGameId] = idList.get(userId);
 
       await updateRow(encodeURI(`idList!A${idIndex}:C${idIndex}`), rowData);
-    } else await appendNewRow('idList', rowData);
+      await event.reply({
+        type: 'text',
+        text: `${originGameId} -> ${gameId}，改個名字都懶嗎!`
+      });
+    } else {
+      await appendNewRow('idList', rowData);
+      await event.reply({
+        type: 'text',
+        text: `${gameId} 沒見過的名字呢`
+      });
+    }
   } catch (err) {
     throw err;
+  }
+}
+
+async function saveDamage(event, damage) {
+  try {
+    const { userId, displayName } = await event.source.profile();
+    const idList = await getIdList();
+    const damageList = await getDamageList();
+    const [, gameId] = idList.get(userId);
+    const recordIdx = damageList.get(gameId);
+
+    if (recordIdx === undefined) {
+      await event.reply({
+        type: 'text',
+        text: `${displayName} 你根本沒有在傷害表名單裡面啊?!`
+      });
+      return;
+    }
+    const days = damageList.get('days');
+    const damageColumeIdx = days.indexOf(getToday());
+    const damageColume = `傷害表(系統)!${String.fromCharCode(65 + damageColumeIdx)}${recordIdx}`;
+
+    await updateRow(damageColume, [[parseInt(damage, 10)]]);
+
+    await event.reply({
+      type: 'text',
+      text: `${gameId} 今日總傷 ${damage}， 好好打不要摸魚啊!`
+    });
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -83,5 +167,6 @@ async function wakeUp(event) {
 
 module.exports = {
   addUserIdToSheet,
-  wakeUp
+  wakeUp,
+  saveDamage
 };

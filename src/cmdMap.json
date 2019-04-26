@@ -1,4 +1,5 @@
 {
-  "recordId": "addUserIdToSheet",
-  "wakeUp": "wakeUp"
+  "登記ID": "addUserIdToSheet",
+  "wakeUp": "wakeUp",
+  "今日總傷": "saveDamage"
 }
