@@ -7,7 +7,7 @@ class CmdManager {
     adminId = ''
   }) {
     this.adminMode = false;
-    this.groupMode = false;
+    this.groupMode = true;
     this.groupId = groupId;
     this.adminId = adminId;
   }
