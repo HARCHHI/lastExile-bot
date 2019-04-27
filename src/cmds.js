@@ -11,6 +11,10 @@ const oauth2Client = new OAuth2Client(
 
 oauth2Client.credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
+function isInteger(value) {
+  return parseInt(value, 10).toString().length === value.length;
+}
+
 function appendNewRow(range, rowData) {
   const sheets = google.sheets('v4');
   const reqBody = {
@@ -132,9 +136,24 @@ async function saveDamage(event, damage) {
     const { userId, displayName } = await event.source.profile();
     const idList = await getIdList();
     const damageList = await getDamageList();
-    const [, gameId] = idList.get(userId);
+    const [, gameId] = idList.get(userId) || [];
     const recordIdx = damageList.get(gameId);
 
+    if (isInteger(damage) === false) {
+      await event.reply({
+        type: 'text',
+        text: `蛤???"${damage}"看起來到底哪裡像整數了??你的腦子沒問題嗎??`
+      });
+      return;
+    }
+
+    if (gameId === undefined) {
+      await event.reply({
+        type: 'text',
+        text: `${displayName} 你沒有登錄過ID呢，新來的?`
+      });
+      return;
+    }
     if (recordIdx === undefined) {
       await event.reply({
         type: 'text',
