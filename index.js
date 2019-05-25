@@ -5,7 +5,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const linebot = require('linebot');
+const cmds = require('./src/cmds');
 const CmdManager = require('./src/cmdManager');
+const templates = require('./persist/textual.json');
 
 
 const bot = linebot({
@@ -16,7 +18,9 @@ const bot = linebot({
 
 const cmdManager = new CmdManager({
   groupId: process.env.LAST_EXILE_GROUP_ID,
-  adminId: process.env.ADMIN_ID
+  adminId: process.env.ADMIN_ID,
+  cmds,
+  textualTemplates: templates
 });
 
 bot.on('message', (event) => {

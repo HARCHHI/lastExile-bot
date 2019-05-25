@@ -1,6 +1,6 @@
 {
-  "ERR_DAMAGE_NOT_INTEGER": "蛤???\"{{damage}}\"看起來到底哪裡像整數了??你的腦子沒問題嗎??",
-  "ERR_GAME_ID_NOT_FOUND": "{{displayName}} 你沒有登錄過ID呢，新來的?",
+  "ERR_DAMAGE_NOT_INTEGER": "蛤???\"{{damage}}\"看起來到底哪裡像正整數了??你的腦子沒問題嗎??",
+  "ERR_GAME_ID_NOT_FOUND": "{{displayName}} 你沒有登記過ID呢，新來的?",
   "ERR_NOT_FOUND_IN_DAMAGE_LIST": "{{displayName}} 你根本沒有在傷害表名單裡面啊?!",
   "REPLY_DAMAGE_ACCEPTED": "{{gameId}} 今日總傷 {{damage}}，好好打不要摸魚啊!",
   "REPLY_GAME_ID_CHANGED": "{{originGameId}} -> {{gameId}}，連改個名字都要麻煩我呢。真拿你沒辦法",

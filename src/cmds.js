@@ -11,8 +11,11 @@ const oauth2Client = new OAuth2Client(
 
 oauth2Client.credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
-function isInteger(value) {
-  return parseInt(value, 10).toString().length === value.length;
+function isPositiveInteger(value) {
+  const numVal = parseInt(value, 10);
+
+  return numVal.toString().length === value.length
+    && numVal > 0;
 }
 
 function appendNewRow(range, rowData) {
@@ -110,25 +113,30 @@ async function addUserIdToSheet(event, gameId) {
     const profile = await event.source.profile();
     const { displayName, userId } = profile;
     const rowData = [[userId, displayName, gameId]];
+    const replyInfo = {
+      code: 'REPLY_CREATE_GAME_ID',
+      args: { gameId }
+    };
 
     if (idList.has(userId) === true) {
       const [idIndex, originGameId] = idList.get(userId);
 
       await updateRow(encodeURI(`idList!A${idIndex}:C${idIndex}`), rowData);
-      await event.reply({
-        type: 'text',
-        text: `${originGameId} -> ${gameId}，改個名字都懶嗎!`
-      });
-    } else {
-      await appendNewRow('idList', rowData);
-      await event.reply({
-        type: 'text',
-        text: `${gameId} 沒見過的名字呢`
-      });
-    }
+
+      replyInfo.code = 'REPLY_GAME_ID_CHANGED';
+      replyInfo.args.originGameId = originGameId;
+    } else await appendNewRow('idList', rowData);
+
+    return replyInfo;
   } catch (err) {
     throw err;
   }
+}
+
+function _isIllegalDamageInfo(damage, gameId, recordIdx) {
+  if (isPositiveInteger(damage) === false) return 'ERR_DAMAGE_NOT_INTEGER';
+  if (gameId === undefined) return 'ERR_GAME_ID_NOT_FOUND';
+  if (recordIdx === undefined) return 'ERR_NOT_FOUND_IN_DAMAGE_LIST';
 }
 
 async function saveDamage(event, damage) {
@@ -138,39 +146,21 @@ async function saveDamage(event, damage) {
     const damageList = await getDamageList();
     const [, gameId] = idList.get(userId) || [];
     const recordIdx = damageList.get(gameId);
+    const replyInfo = {
+      args: { displayName, gameId, damage }
+    };
 
-    if (isInteger(damage) === false) {
-      await event.reply({
-        type: 'text',
-        text: `蛤???"${damage}"看起來到底哪裡像整數了??你的腦子沒問題嗎??`
-      });
-      return;
-    }
+    replyInfo.code = _isIllegalDamageInfo(damage, gameId, recordIdx);
 
-    if (gameId === undefined) {
-      await event.reply({
-        type: 'text',
-        text: `${displayName} 你沒有登錄過ID呢，新來的?`
-      });
-      return;
-    }
-    if (recordIdx === undefined) {
-      await event.reply({
-        type: 'text',
-        text: `${displayName} 你根本沒有在傷害表名單裡面啊?!`
-      });
-      return;
-    }
+    if (replyInfo.code) return replyInfo;
     const days = damageList.get('days');
     const damageColumeIdx = days.indexOf(getToday());
     const damageColume = `傷害表(系統)!${String.fromCharCode(65 + damageColumeIdx)}${recordIdx}`;
 
     await updateRow(damageColume, [[parseInt(damage, 10)]]);
 
-    await event.reply({
-      type: 'text',
-      text: `${gameId} 今日總傷 ${damage}， 好好打不要摸魚啊!`
-    });
+    replyInfo.code = 'REPLY_DAMAGE_ACCEPTED';
+    return replyInfo;
   } catch (error) {
     throw error;
   }

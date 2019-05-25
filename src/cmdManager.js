@@ -1,15 +1,19 @@
-const cmds = require('./cmds');
 const cmdMap = require('./cmdMap');
+const templater = require('./templater');
 
 class CmdManager {
   constructor({
     groupId = '',
-    adminId = ''
+    adminId = '',
+    cmds = {},
+    textualTemplates
   }) {
+    this.cmds = cmds;
     this.adminMode = false;
     this.groupMode = true;
     this.groupId = groupId;
     this.adminId = adminId;
+    this.textualTemplates = textualTemplates;
   }
 
   _isGroupMessage(sourceType, groupId) {
@@ -70,22 +74,46 @@ class CmdManager {
     }
   }
 
+  _getCmdMethod(cmd) {
+    return this.cmds[cmdMap[cmd]];
+  }
+
+  setCmds(cmds) {
+    this.cmds = cmds;
+  }
+
+  /**
+   * execute command from line webhook
+   * @param {*} event line event object
+   * @param {string} msg line message
+   */
   async execute(event, msg) {
     try {
       const { userId, type: sourceType, groupId } = event.source;
       const { cmd = null, param } = this._messageParser(msg);
-      const method = cmds[cmdMap[cmd]];
+      const method = this._getCmdMethod(cmd);
+      let resInfo = {};
 
       await this._adminCmd(cmd, param, event);
 
       if (method === undefined) return;
       if (this.adminId === userId || this.adminMode === true) {
-        if (this.adminId === userId) method(event, ...param);
-        return;
+        if (this.adminId === userId) resInfo = await method(event, ...param);
       }
 
-      if (this.groupMode === true && this._isGroupMessage(sourceType, groupId)) {
-        method(event, ...param);
+      if (resInfo.code === undefined
+          && this.groupMode === true
+          && this._isGroupMessage(sourceType, groupId)) {
+        resInfo = await method(event, ...param);
+      }
+
+      const template = this.textualTemplates[resInfo.code];
+
+      if (resInfo.code && template !== undefined) {
+        await event.reply({
+          type: 'text',
+          text: templater(template, resInfo.args)
+        });
       }
     } catch (error) {
       throw error;
