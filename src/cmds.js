@@ -94,13 +94,13 @@ async function getDamageList() {
   });
 
   return res.data.values.reduce((result, row, index) => {
-    let [gameId] = row;
+    const [gameId] = row;
 
     if (index === 0) {
       result.set('days', row);
       return result;
     }
-    gameId = gameId.replace(/\[.*\] {0,1}/g, '');
+    // gameId = gameId.replace(/\[.*\] {0,1}/g, '');
     result.set(gameId, index + 2);
 
     return result;
