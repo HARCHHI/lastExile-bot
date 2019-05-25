@@ -1,5 +1,7 @@
 {
   "登記ID": "addUserIdToSheet",
   "wakeUp": "wakeUp",
-  "今日總傷": "saveDamage"
+
+  "今日總傷": "saveDamage",
+  "sd": "saveDamage"
 }

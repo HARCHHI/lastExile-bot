@@ -100,7 +100,7 @@ async function getDamageList() {
       result.set('days', row);
       return result;
     }
-    // gameId = gameId.replace(/\[.*\] {0,1}/g, '');
+
     result.set(gameId, index + 2);
 
     return result;
