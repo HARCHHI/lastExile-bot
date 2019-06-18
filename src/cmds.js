@@ -280,7 +280,7 @@ async function bloodTest(event) {
     if (bloodType <= GOLD_THRESHOLD
       && bloodType > COLOR_THRESHOLD) gold += 1;
   }
-  if (color > 1) resInfo.code = 'REPLY_BLOOD_TEST_EURPOE';
+  if (color >= 1) resInfo.code = 'REPLY_BLOOD_TEST_EURPOE';
   if (color === 0 && gold >= 3) resInfo.code = 'REPLY_BLOOD_TEST_ASIA';
 
   resInfo.args = {
