@@ -3,5 +3,8 @@
   "wakeUp": "wakeUp",
 
   "今日總傷": "saveDamage",
-  "sd": "saveDamage"
+  "sd": "saveDamage",
+
+  "出刀": "recordAttack",
+  "驗血": "bloodTest"
 }

@@ -2,7 +2,14 @@
   "ERR_DAMAGE_NOT_INTEGER": "蛤???\"{{damage}}\"看起來到底哪裡像正整數了??你的腦子沒問題嗎??",
   "ERR_GAME_ID_NOT_FOUND": "{{displayName}} 你沒有登記過ID呢，新來的?",
   "ERR_NOT_FOUND_IN_DAMAGE_LIST": "{{displayName}} 你根本沒有在傷害表名單裡面啊?!",
+
   "REPLY_DAMAGE_ACCEPTED": "{{gameId}} 今日總傷 {{damage}}，好好打不要摸魚啊!",
   "REPLY_GAME_ID_CHANGED": "{{originGameId}} -> {{gameId}}，連改個名字都要麻煩我呢。真拿你沒辦法",
-  "REPLY_CREATE_GAME_ID": "{{gameId}} 沒見過的名字呢，請多指教"
+  "REPLY_CREATE_GAME_ID": "{{gameId}} 沒見過的名字呢，請多指教",
+
+  "ERR_ATTACK_TYPE_NOT_FOUND": "只有{{acceptType}}這幾種刀種，{{type}}是什麼啊!",
+  "REPLY_ATTACK_RECORED": "{{displayName}} > {{attackType}}, 王別: {{comment}}，記下來囉",
+  "REPLY_BLOOD_TEST_AFRICA": "{{displayName}} {{gold}}金 歡迎來到非洲，朋友",
+  "REPLY_BLOOD_TEST_ASIA": "{{displayName}} {{gold}}金 亞洲一日遊",
+  "REPLY_BLOOD_TEST_EURPOE": "{{color}}彩{{gold}}金 歐洲人=="
 }

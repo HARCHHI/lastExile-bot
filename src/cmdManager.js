@@ -98,7 +98,7 @@ class CmdManager {
 
       if (method === undefined) return;
       if (this.adminId === userId || this.adminMode === true) {
-        if (this.adminId === userId) resInfo = await method(event, ...param);
+        if (this.adminId === userId) resInfo = await method(event, ...param) || {};
       }
 
       if (resInfo.code === undefined
