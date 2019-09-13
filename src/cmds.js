@@ -292,10 +292,40 @@ async function bloodTest(event) {
   return resInfo;
 }
 
+async function rollDice(event, dice) {
+  const { displayName } = await event.source.profile();
+  const replyInfo = { code: undefined, args: { displayName, dice } };
+
+  dice = dice.toLowerCase();
+  let [amount, point] = dice.split('d');
+
+  if (_isPositiveInteger(amount) === false) {
+    replyInfo.args.damage = amount;
+    replyInfo.code = 'ERR_DAMAGE_NOT_INTEGER';
+  }
+  if (_isPositiveInteger(point) === false) {
+    replyInfo.args.damage = point;
+    replyInfo.code = 'ERR_DAMAGE_NOT_INTEGER';
+  }
+  if (replyInfo.code) return replyInfo;
+
+  amount = parseInt(amount, 10);
+  point = parseInt(point, 10);
+
+  let result = 0;
+  for (let i = 0; i < amount; i += 1) {
+    result += Math.floor(point * Math.random()) + 1;
+  }
+  replyInfo.code = 'REPLY_ROLL_DICE_RESULT';
+  replyInfo.args.result = result;
+  return replyInfo;
+}
+
 module.exports = {
   addUserIdToSheet,
   wakeUp,
   saveDamage,
   recordAttack,
-  bloodTest
+  bloodTest,
+  rollDice
 };

@@ -11,5 +11,6 @@
   "REPLY_ATTACK_RECORED": "{{displayName}} > {{attackType}}, 王別: {{comment}}，記下來囉",
   "REPLY_BLOOD_TEST_AFRICA": "{{displayName}} {{gold}}金 歡迎來到非洲，朋友",
   "REPLY_BLOOD_TEST_ASIA": "{{displayName}} {{gold}}金 亞洲一日遊",
-  "REPLY_BLOOD_TEST_EURPOE": "{{color}}彩{{gold}}金 歐洲人=="
+  "REPLY_BLOOD_TEST_EURPOE": "{{color}}彩{{gold}}金 歐洲人==",
+  "REPLY_ROLL_DICE_RESULT": "{{displayName}}: {{dice}} > {{result}}"
 }

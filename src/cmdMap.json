@@ -4,7 +4,8 @@
 
   "今日總傷": "saveDamage",
   "sd": "saveDamage",
-
   "出刀": "recordAttack",
-  "驗血": "bloodTest"
+
+  "驗血": "bloodTest",
+  "r": "rollDice"
 }
