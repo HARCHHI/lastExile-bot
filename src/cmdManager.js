@@ -22,7 +22,7 @@ class CmdManager {
 
   _messageParser(msg) {
     try {
-      const matchResult = msg.match(/^!(.*)/);
+      const matchResult = msg.match(/^[!,！](.*)/);
       let cmd = null;
       let param;
 
