@@ -94,15 +94,17 @@ class CmdManager {
       const method = this._getCmdMethod(cmd);
       let resInfo = {};
 
-      await this._adminCmd(cmd, param, event);
-
-      if (method === undefined) return;
       if (this.adminId === userId || this.adminMode === true) {
-        if (this.adminId === userId) resInfo = await method(event, ...param) || {};
+        if (this.adminId === userId) {
+          await this._adminCmd(cmd, param, event);
+          if (method !== undefined) resInfo = await method(event, ...param) || {};
+        }
       }
+      if (method === undefined) return;
 
       if (resInfo.code === undefined
           && this.groupMode === true
+          && this.adminMode === false
           && this._isGroupMessage(sourceType, groupId)) {
         resInfo = await method(event, ...param);
       }
