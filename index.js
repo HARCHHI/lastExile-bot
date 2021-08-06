@@ -18,6 +18,7 @@ const bot = linebot({
 
 const cmdManager = new CmdManager({
   groupId: process.env.LAST_EXILE_GROUP_ID,
+  yuzuGroupId: process.env.YUZU_GROUP_ID,
   adminId: process.env.ADMIN_ID,
   cmds,
   textualTemplates: templates

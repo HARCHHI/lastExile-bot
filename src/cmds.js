@@ -2,6 +2,7 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
 const pg = require('pg');
+const BattleStatus = require('./battleStatus');
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -27,10 +28,10 @@ function _isPositiveInteger(value) {
     && numVal > 0;
 }
 
-function _appendNewRow(range, rowData) {
+function _appendNewRow(range, rowData, sheetId = process.env.TARGET_SHEET_ID) {
   const reqBody = {
     auth: oauth2Client,
-    spreadsheetId: process.env.TARGET_SHEET_ID,
+    spreadsheetId: sheetId,
     range: encodeURI(range),
     insertDataOption: 'INSERT_ROWS',
     valueInputOption: 'RAW',
@@ -42,18 +43,18 @@ function _appendNewRow(range, rowData) {
   return sheets.spreadsheets.values.append(reqBody);
 }
 
-function _clearRows(range) {
+function _clearRows(range, sheetId = process.env.TARGET_SHEET_ID) {
   return sheets.spreadsheets.values.clear({
     auth: oauth2Client,
-    spreadsheetId: process.env.TARGET_SHEET_ID,
+    spreadsheetId: sheetId,
     range
   });
 }
 
-function _updateRow(range, rowData) {
+function _updateRow(range, rowData, sheetId = process.env.TARGET_SHEET_ID) {
   const reqBody = {
     auth: oauth2Client,
-    spreadsheetId: process.env.TARGET_SHEET_ID,
+    spreadsheetId: sheetId,
     range,
     valueInputOption: 'RAW',
     resource: {
@@ -321,11 +322,186 @@ async function rollDice(event, dice) {
   return replyInfo;
 }
 
+const yuzuBattleStatus = new BattleStatus(process.env.YUZU_GROUP_ID, pool);
+
+async function _getYuzuIdList() {
+  const res = await sheets.spreadsheets.values.get({
+    auth: oauth2Client,
+    spreadsheetId: process.env.YUZU_SHEET_ID,
+    range: encodeURI('idList!A1:C99')
+  });
+
+  return _parseIdList(res.data.values);
+}
+
+async function addYuzuUserIdToSheet(event, gameId) {
+  try {
+    const idList = await _getYuzuIdList();
+    const profile = await event.source.profile();
+    const { displayName, userId } = profile;
+    const rowData = [[userId, displayName, gameId]];
+    const replyInfo = {
+      code: 'REPLY_CREATE_GAME_ID',
+      args: { gameId }
+    };
+
+    if (idList.has(userId) === true) {
+      const [idIndex, originGameId] = idList.get(userId);
+
+      await _updateRow(encodeURI(`idList!A${idIndex}:C${idIndex}`), rowData, process.env.YUZU_SHEET_ID);
+
+      replyInfo.code = 'REPLY_GAME_ID_CHANGED';
+      replyInfo.args.originGameId = originGameId;
+    } else await _appendNewRow('idList', rowData, process.env.YUZU_SHEET_ID);
+
+    return replyInfo;
+  } catch (err) {
+    throw err;
+  }
+}
+
+function _loadYuzuAttackTs() {
+  return pool.query('SELECT value FROM session WHERE key=\'yuzuAttackTs\';');
+}
+
+async function _getYuzuAttackRecordList() {
+  const res = await sheets.spreadsheets.values.get({
+    auth: oauth2Client,
+    spreadsheetId: process.env.YUZU_SHEET_ID,
+    range: '出刀表!D6:G36'
+  });
+
+  return res.data.values.reduce((result, row, idx) => {
+    const [gameId] = row;
+
+    if (idx === 0) result.set('types', row.slice(1));
+    else result.set(gameId, idx);
+
+    return result;
+  }, new Map());
+}
+
+async function _resetYuzuAttackTable() {
+  const promiseList = [];
+
+  promiseList.push(pool.query(`
+    UPDATE session SET value = $1::text
+    WHERE key='yuzuAttackTs';
+  `, [(new Date()).getTime()]));
+  promiseList.push(_clearRows('出刀表!E7:G36', process.env.YUZU_SHEET_ID));
+
+  return Promise.all(promiseList);
+}
+
+async function yuzuAttacked(event, type, comment) {
+  const [profile, idList, recordTs, recordList] = await Promise.all([
+    event.source.profile(),
+    _getYuzuIdList(),
+    _loadYuzuAttackTs(),
+    _getYuzuAttackRecordList()
+  ]);
+  const { userId, displayName } = profile;
+  const attackTypes = recordList.get('types');
+  const typeIdx = attackTypes.indexOf(type);
+  const [, gameId] = idList.get(userId) || [];
+  const userIdx = recordList.get(gameId);
+
+  if (gameId === undefined) return { code: 'ERR_GAME_ID_NOT_FOUND', args: { displayName } };
+  if (_isDayChanged(recordTs.rows[0].value)) await _resetYuzuAttackTable();
+  if (typeIdx === -1 && type !== '完刀') {
+    return {
+      code: 'ERR_ATTACK_TYPE_NOT_FOUND',
+      args: { type, acceptType: attackTypes.join(' ') }
+    };
+  }
+
+  if (type === '完刀') {
+    await _updateRow(
+      `出刀表!E${userIdx + 6}:G${userIdx + 6}`,
+      [[comment, 'done', 'done']],
+      process.env.YUZU_SHEET_ID
+    );
+  } else {
+    await _updateRow(
+      `出刀表!${String.fromCharCode(69 + typeIdx)}${userIdx + 6}`,
+      [[comment]],
+      process.env.YUZU_SHEET_ID
+    );
+  }
+
+  return {
+    code: 'REPLY_ATTACK_RECORED',
+    args: {
+      displayName,
+      attackType: type || '完刀',
+      comment
+    }
+  };
+}
+
+async function yuzuBattleIn(event) {
+  const { userId, displayName } = await event.source.profile();
+  const result = await yuzuBattleStatus.getIn(displayName, userId);
+  const code = result ? 'REPLY_YUZU_BOSS_IN' : 'ERR_YUZU_BOSS_IN_DUPLICATE';
+
+
+  return {
+    code,
+    args: {
+      displayName
+    }
+  };
+}
+
+async function yuzuBattleUpdate(event, comment) {
+  const { userId, displayName } = await event.source.profile();
+
+  await yuzuBattleStatus.update(displayName, userId, comment);
+
+  return {
+    code: 'REPLY_YUZU_BOSS_UPDATE',
+    args: {
+      displayName,
+      comment
+    }
+  };
+}
+
+async function yuzuGetBattleStatus() {
+  const status = await yuzuBattleStatus.getStatus();
+  const payload = status.reduce((result, [, { name, status: val }]) => {
+    result += `${name}: ${val}\n`;
+
+    return result;
+  }, '');
+
+  return {
+    code: 'REPLY_YUZU_BOSS_STATUS',
+    args: {
+      payload
+    }
+  };
+}
+
+async function yuzuBattleReset() {
+  await yuzuBattleStatus.reset();
+
+  return {
+    code: 'REPLAY_YUZU_BOSS_RESET'
+  };
+}
+
 module.exports = {
   addUserIdToSheet,
   wakeUp,
   saveDamage,
   recordAttack,
   bloodTest,
-  rollDice
+  rollDice,
+  yuzuAttacked,
+  addYuzuUserIdToSheet,
+  yuzuBattleIn,
+  yuzuBattleUpdate,
+  yuzuGetBattleStatus,
+  yuzuBattleReset
 };

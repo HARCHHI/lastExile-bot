@@ -1,10 +1,12 @@
 const cmdMap = require('./cmdMap');
+const yuzuMap = require('./yuzuCmdMap.json');
 const templater = require('./templater');
 
 class CmdManager {
   constructor({
     groupId = '',
     adminId = '',
+    yuzuGroupId = '',
     cmds = {},
     textualTemplates
   }) {
@@ -12,12 +14,13 @@ class CmdManager {
     this.adminMode = false;
     this.groupMode = true;
     this.groupId = groupId;
+    this.yuzuGroupId = yuzuGroupId;
     this.adminId = adminId;
     this.textualTemplates = textualTemplates;
   }
 
   _isGroupMessage(sourceType, groupId) {
-    return sourceType === 'group' && groupId === this.groupId;
+    return sourceType === 'group' && (groupId === this.groupId || groupId === this.yuzuGroupId);
   }
 
   _messageParser(msg) {
@@ -74,7 +77,8 @@ class CmdManager {
     }
   }
 
-  _getCmdMethod(cmd) {
+  _getCmdMethod(cmd, groupId) {
+    if (groupId === this.yuzuGroupId) return this.cmds[yuzuMap[cmd]];
     return this.cmds[cmdMap[cmd]];
   }
 
@@ -91,7 +95,7 @@ class CmdManager {
     try {
       const { userId, type: sourceType, groupId } = event.source;
       const { cmd = null, param } = this._messageParser(msg);
-      const method = this._getCmdMethod(cmd);
+      const method = this._getCmdMethod(cmd, groupId);
       let resInfo = {};
 
       if (this.adminId === userId || this.adminMode === true) {

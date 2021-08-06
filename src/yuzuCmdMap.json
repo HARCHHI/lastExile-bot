@@ -1,0 +1,14 @@
+{
+  "wakeUp": "wakeUp",
+  "驗血": "bloodTest",
+  "r": "rollDice",
+  "登記ID": "addYuzuUserIdToSheet",
+  "出刀": "yuzuAttacked",
+  "進": "yuzuBattleIn",
+  "進場": "yuzuBattleIn",
+  "+1": "yuzuBattleIn",
+  "回報": "yuzuBattleUpdate",
+  "場內狀態": "yuzuGetBattleStatus",
+  "誰在一壘": "yuzuGetBattleStatus",
+  "王倒": "yuzuBattleReset"
+}

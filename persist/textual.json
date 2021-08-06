@@ -12,5 +12,11 @@
   "REPLY_BLOOD_TEST_AFRICA": "{{displayName}} {{gold}}金 歡迎來到非洲，朋友",
   "REPLY_BLOOD_TEST_ASIA": "{{displayName}} {{gold}}金 亞洲一日遊",
   "REPLY_BLOOD_TEST_EURPOE": "{{color}}彩{{gold}}金 歐洲人==",
-  "REPLY_ROLL_DICE_RESULT": "{{displayName}}: {{dice}} > {{result}}"
+  "REPLY_ROLL_DICE_RESULT": "{{displayName}}: {{dice}} > {{result}}",
+
+  "ERR_YUZU_BOSS_IN_DUPLICATE": "{{displayName}} 是要進場幾次?????",
+  "REPLY_YUZU_BOSS_IN": "{{displayName}} 進場囉",
+  "REPLY_YUZU_BOSS_UPDATE": "{{displayName}} 場內回報: {{comment}}",
+  "REPLY_YUZU_BOSS_STATUS": "目前出刀狀況為：\n{{payload}}",
+  "REPLAY_YUZU_BOSS_RESET": "王倒囉，還在裡面的下樹下樹"
 }
