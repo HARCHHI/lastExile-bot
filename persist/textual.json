@@ -18,5 +18,10 @@
   "REPLY_YUZU_BOSS_IN": "{{displayName}} 進場囉",
   "REPLY_YUZU_BOSS_UPDATE": "{{displayName}} 場內回報: {{comment}}",
   "REPLY_YUZU_BOSS_STATUS": "目前出刀狀況為：\n{{payload}}",
-  "REPLAY_YUZU_BOSS_RESET": "王倒囉，還在裡面的下樹下樹"
+  "REPLAY_YUZU_BOSS_RESET": "王倒囉，還在裡面的下樹下樹",
+  "REPLY_DICK_DISAPPEAR": "{{displayName}} 完拉，你ㄐㄐ怎麼不見",
+  "REPLY_NANO_DICK": "{{displayName}} {{dickScore}}cm奈米屌",
+  "REPLY_NORMAL_DICK": "{{displayName}} {{dickScore}}cm",
+  "REPLY_BIG_DICK": "{{displayName}} {{dickScore}}cm大屌",
+  "REPLY_BIG_DICK_CUTE_GIRL": "{{displayName}} {{dickScore}}cm 爆幹大屌萌妹"
 }

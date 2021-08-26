@@ -322,6 +322,23 @@ async function rollDice(event, dice) {
   return replyInfo;
 }
 
+async function dickCompetition(event) {
+  const { displayName } = await event.source.profile();
+  let dickScore = Math.floor(Math.random() * 70);
+  const replyInfo = { code: undefined, args: { displayName } };
+
+  if (dickScore <= 5) replyInfo.code = 'REPLY_DICK_DISAPPEAR';
+  if (dickScore > 5 && dickScore <= 11) replyInfo.code = 'REPLY_NANO_DICK';
+  if (dickScore > 11 && dickScore <= 60) replyInfo.code = 'REPLY_NORMAL_DICK';
+  if (dickScore > 60 && dickScore <= 65) replyInfo.code = 'REPLY_BIG_DICK';
+  if (dickScore > 65 && dickScore <= 70) replyInfo.code = 'REPLY_BIG_DICK_CUTE_GIRL';
+
+  dickScore = Math.floor((dickScore - 5) / 2 + 0.5);
+  replyInfo.args.dickScore = dickScore;
+
+  return replyInfo;
+}
+
 const yuzuBattleStatus = new BattleStatus(process.env.YUZU_GROUP_ID, pool);
 
 async function _getYuzuIdList() {
@@ -498,6 +515,7 @@ module.exports = {
   recordAttack,
   bloodTest,
   rollDice,
+  dickCompetition,
   yuzuAttacked,
   addYuzuUserIdToSheet,
   yuzuBattleIn,

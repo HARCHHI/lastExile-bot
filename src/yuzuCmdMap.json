@@ -10,5 +10,6 @@
   "回報": "yuzuBattleUpdate",
   "場內狀態": "yuzuGetBattleStatus",
   "誰在一壘": "yuzuGetBattleStatus",
-  "王倒": "yuzuBattleReset"
+  "王倒": "yuzuBattleReset",
+  "比ㄐㄐ": "dickCompetition"
 }
