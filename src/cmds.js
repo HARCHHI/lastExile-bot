@@ -435,7 +435,7 @@ async function yuzuAttacked(event, type, comment) {
   if (type === '完刀') {
     await _updateRow(
       `出刀表!E${userIdx + 6}:G${userIdx + 6}`,
-      [[comment, 'done', 'done']],
+      [[comment || 'done', 'done', 'done']],
       process.env.YUZU_SHEET_ID
     );
   } else {
@@ -451,7 +451,7 @@ async function yuzuAttacked(event, type, comment) {
     args: {
       displayName,
       attackType: type || '完刀',
-      comment
+      comment: type === '完刀' ? comment || '完刀' : comment
     }
   };
 }
