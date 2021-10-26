@@ -507,8 +507,9 @@ async function yuzuGetBattleStatus(event, bossNum) {
     };
   }
   const status = await yuzuBattleStatus.getStatus(bossNum);
-  const payload = status.reduce((result, [, { name, status: val }]) => {
-    result += `${name}: ${val}\n`;
+
+  const payload = status.reduce((result, [, val]) => {
+    result += `${val.name}: ${val.status} ${val.bossNum}王\n`;
 
     return result;
   }, '');
