@@ -14,6 +14,7 @@
   "REPLY_BLOOD_TEST_EURPOE": "{{color}}彩{{gold}}金 歐洲人==",
   "REPLY_ROLL_DICE_RESULT": "{{displayName}}: {{dice}} > {{result}}",
 
+  "ERR_YUZU_NOT_A_BOSS": "{{displayName}} 第幾隻王要打數字，\"數字\" 懂?",
   "ERR_YUZU_BOSS_IN_DUPLICATE": "{{displayName}} 是要進場幾次?????",
   "REPLY_YUZU_BOSS_IN": "{{displayName}} 進場囉",
   "REPLY_YUZU_BOSS_UPDATE": "{{displayName}} 場內回報: {{comment}}",

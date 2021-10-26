@@ -456,11 +456,18 @@ async function yuzuAttacked(event, type, comment) {
   };
 }
 
-async function yuzuBattleIn(event) {
+async function yuzuBattleIn(event, bossNum) {
   const { userId, displayName } = await event.source.profile();
-  const result = await yuzuBattleStatus.getIn(displayName, userId);
-  const code = result ? 'REPLY_YUZU_BOSS_IN' : 'ERR_YUZU_BOSS_IN_DUPLICATE';
 
+  if (!bossNum || _isPositiveInteger(bossNum) === false) {
+    return {
+      code: 'ERR_YUZU_NOT_A_BOSS',
+      args: { displayName }
+    };
+  }
+
+  const result = await yuzuBattleStatus.getIn(displayName, userId, bossNum);
+  const code = result ? 'REPLY_YUZU_BOSS_IN' : 'ERR_YUZU_BOSS_IN_DUPLICATE';
 
   return {
     code,
@@ -470,10 +477,16 @@ async function yuzuBattleIn(event) {
   };
 }
 
-async function yuzuBattleUpdate(event, comment) {
+async function yuzuBattleUpdate(event, bossNum, comment) {
   const { userId, displayName } = await event.source.profile();
 
-  await yuzuBattleStatus.update(displayName, userId, comment);
+  if (_isPositiveInteger(bossNum) === false) {
+    return {
+      code: 'ERR_YUZU_NOT_A_BOSS',
+      args: { displayName }
+    };
+  }
+  await yuzuBattleStatus.update(displayName, userId, bossNum, comment);
 
   return {
     code: 'REPLY_YUZU_BOSS_UPDATE',
@@ -484,8 +497,16 @@ async function yuzuBattleUpdate(event, comment) {
   };
 }
 
-async function yuzuGetBattleStatus() {
-  const status = await yuzuBattleStatus.getStatus();
+async function yuzuGetBattleStatus(event, bossNum) {
+  const { displayName } = await event.source.profile();
+
+  if (bossNum && _isPositiveInteger(bossNum) === false) {
+    return {
+      code: 'ERR_YUZU_NOT_A_BOSS',
+      args: { displayName }
+    };
+  }
+  const status = await yuzuBattleStatus.getStatus(bossNum);
   const payload = status.reduce((result, [, { name, status: val }]) => {
     result += `${name}: ${val}\n`;
 
@@ -500,8 +521,16 @@ async function yuzuGetBattleStatus() {
   };
 }
 
-async function yuzuBattleReset() {
-  await yuzuBattleStatus.reset();
+async function yuzuBattleReset(event, bossNum) {
+  const { displayName } = await event.source.profile();
+
+  if (bossNum && _isPositiveInteger(bossNum) === false) {
+    return {
+      code: 'ERR_YUZU_NOT_A_BOSS',
+      args: { displayName }
+    };
+  }
+  await yuzuBattleStatus.reset(bossNum);
 
   return {
     code: 'REPLAY_YUZU_BOSS_RESET'
