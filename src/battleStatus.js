@@ -49,7 +49,7 @@ class BattleStatus {
     if (this.warmUpTs === -1) await this._warmUp();
     const res = Array.from(this.status.entries());
 
-    if (bossNum) res.filter((key, val) => val.bossNum === bossNum);
+    if (bossNum) res.filter(([, val]) => val.bossNum === bossNum);
 
     return res;
   }
@@ -61,7 +61,7 @@ class BattleStatus {
       await this.pgPool.query('update session set value = \'[]\' where key = \'yuzuBattleStatus\'');
     } else {
       const res = Array.from(this.status.entries());
-      res.filter((key, val) => val.bossNum !== bossNum);
+      res.filter(([, val]) => val.bossNum !== bossNum);
       this.status = new Map(res);
 
       this.pgPool.query(`
