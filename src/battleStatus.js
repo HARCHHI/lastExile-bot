@@ -14,20 +14,17 @@ class BattleStatus {
 
   async getIn(name, userId, bossNum) {
     if (this.warmUpTs === -1) await this._warmUp();
-    if (this.status.has(userId) === false) {
-      this.status.set(userId, {
-        name,
-        bossNum,
-        status: '進場'
-      });
+    this.status.set(userId, {
+      name,
+      bossNum,
+      status: '進場'
+    });
 
-      await this.pgPool.query(`
-        UPDATE session SET value = $1::text
-        WHERE key='yuzuBattleStatus';
-      `, [JSON.stringify(Array.from(this.status.entries()))]);
-      return true;
-    }
-    return false;
+    await this.pgPool.query(`
+      UPDATE session SET value = $1::text
+      WHERE key='yuzuBattleStatus';
+    `, [JSON.stringify(Array.from(this.status.entries()))]);
+    return true;
   }
 
   async update(name, userId, bossNum, comment) {
@@ -47,9 +44,9 @@ class BattleStatus {
 
   async getStatus(bossNum) {
     if (this.warmUpTs === -1) await this._warmUp();
-    const res = Array.from(this.status.entries());
+    let res = Array.from(this.status.entries());
 
-    if (bossNum) res.filter(([, val]) => val.bossNum === bossNum);
+    if (bossNum) res = res.filter(([, val]) => val.bossNum === bossNum);
 
     return res;
   }
@@ -60,8 +57,8 @@ class BattleStatus {
       this.status = new Map();
       await this.pgPool.query('update session set value = \'[]\' where key = \'yuzuBattleStatus\'');
     } else {
-      const res = Array.from(this.status.entries());
-      res.filter(([, val]) => val.bossNum !== bossNum);
+      const res = Array.from(this.status.entries())
+        .filter(([, val]) => val.bossNum !== bossNum);
       this.status = new Map(res);
 
       this.pgPool.query(`
